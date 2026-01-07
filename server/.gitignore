@@ -1,0 +1,86 @@
+# =====================
+# OS / System files
+# =====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =====================
+# Editor / IDE files
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+
+# =====================
+# Logs
+# =====================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.*
+!.env.example
+
+# =====================
+# Dependencies
+# =====================
+node_modules/
+bower_components/
+vendor/
+
+# =====================
+# Build / Dist output
+# =====================
+dist/
+build/
+out/
+coverage/
+
+# =====================
+# Cache
+# =====================
+.cache/
+.tmp/
+.temp/
+
+# =====================
+# Runtime data
+# =====================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# =====================
+# Package manager locks (optional)
+# =====================
+# Uncomment if you don't want lock files tracked
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =====================
+# Misc
+# =====================
+*.bak
+*.tmp
+*.old

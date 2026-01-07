@@ -1,0 +1,351 @@
+
+.tender-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.tender-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 1.25rem;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.tender-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.tender-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  border-color: #667eea;
+}
+
+.tender-card h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.75rem 0;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.tender-card p {
+  margin-bottom: 1rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.tender-card p b {
+  color: #374151;
+  font-weight: 600;
+}
+
+.tender-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* STATUS BADGES */
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.status-open {
+  background: #d1fae5;
+  color: #065f46;
+  border-left: 3px solid #10b981;
+}
+
+.status-closed {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border-left: 3px solid #ef4444;
+}
+
+.status-not-started {
+  background: #fef3c7;
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+}
+
+/* TIMER */
+.timer {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+  text-align: center;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* BID SECTION */
+.bid-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bid-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border-left: 3px solid #667eea;
+}
+
+.bid-info p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.bid-input-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.bid-input-group input {
+  flex: 1;
+  max-width: 100%;
+  padding: 0.9rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.bid-input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.bid-input-group button {
+  padding: 0.9rem 1.5rem;
+  min-width: 130px;
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* NO BID MESSAGE */
+.no-bid {
+  background: #fef3c7;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+  font-weight: 500;
+  margin: 1rem 0;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.action-buttons button {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 0.95rem;
+  min-width: auto;
+  margin: 0;
+  border-radius: 0.75rem;
+  font-weight: 600;
+}
+
+.action-buttons button:hover {
+  transform: translateY(-2px);
+}
+
+/* COMPLETED STATUS */
+.completed-badge {
+  display: inline-block;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.pending-badge {
+  display: inline-block;
+  background: #fee2e2;
+  color: #7f1d1d;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tender-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.tender-card:nth-child(1) { animation-delay: 0.05s; }
+.tender-card:nth-child(2) { animation-delay: 0.1s; }
+.tender-card:nth-child(3) { animation-delay: 0.15s; }
+.tender-card:nth-child(4) { animation-delay: 0.2s; }
+.tender-card:nth-child(n+5) { animation-delay: 0.25s; }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .tender-list {
+    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .tender-list {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .tender-card {
+    padding: 1.5rem;
+  }
+
+  .tender-meta {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tender-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .bid-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bid-input-group button {
+    width: 100%;
+  }
+
+  .timer {
+    font-size: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tender-card {
+    padding: 1rem;
+  }
+
+  .tender-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .tender-meta {
+    font-size: 0.9rem;
+  }
+
+  .meta-value {
+    font-size: 1rem;
+  }
+
+  .timer {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+}
+
