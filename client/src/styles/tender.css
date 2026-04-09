@@ -1,351 +1,411 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap');
 
+/* ─── Design tokens ─────────────────────────────────── */
+:root {
+  --c-bg:           #f4f3ef;
+  --c-surface:      #ffffff;
+  --c-ink:          #1a1a1a;
+  --c-muted:        #6b6b6b;
+  --c-faint:        #d4d1c8;
+  --c-accent:       #1a3a5c;
+  --c-accent-light: #eaf0f7;
+  --c-open:         #0f5c3a;
+  --c-open-bg:      #e4f5ec;
+  --c-closed:       #7f1d1d;
+  --c-closed-bg:    #fde8e8;
+  --c-pending:      #7c4a00;
+  --c-pending-bg:   #fef3dd;
+  --c-bid:          #1a3a5c;
+  --c-bid-bg:       #eaf0f7;
+  --radius-sm:      4px;
+  --radius-md:      8px;
+  --radius-lg:      14px;
+  --shadow-card:    0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --font-ui:        'Sora', sans-serif;
+  --font-mono:      'IBM Plex Mono', monospace;
+  --transition:     0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Grid ──────────────────────────────────────────── */
 .tender-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
-  gap: 2rem;
-  padding: 1rem 0;
-  animation: fadeIn 0.5s ease-out;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 640px), 1fr));
+  gap: 1.5rem;
+  padding: 0.25rem 0 2rem;
 }
 
+/* ─── Card ──────────────────────────────────────────── */
 .tender-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 1.25rem;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  border: 1px solid #e5e7eb;
-  text-align: left;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-ui);
+  background: var(--c-surface);
+  border: 1px solid var(--c-faint);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  position: relative;
   overflow: hidden;
-}
-
-.tender-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  animation: cardIn 0.35s ease-out both;
 }
 
 .tender-card:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-  transform: translateY(-8px);
-  border-color: #667eea;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 12px 36px rgba(0,0,0,0.09);
+  transform: translateY(-3px);
+  border-color: var(--c-accent);
+}
+
+/* ─── Card: accent stripe ───────────────────────────── */
+.tender-card__stripe {
+  height: 3px;
+  background: var(--c-accent);
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* ─── Card: body ────────────────────────────────────── */
+.tender-card__body {
+  padding: 1.75rem 1.75rem 0;
+  flex: 1;
+}
+
+.tender-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .tender-card h3 {
-  font-size: 1.5rem;
-  margin: 0 0 0.75rem 0;
-  color: #1f2937;
-  word-break: break-word;
-}
-
-.tender-card p {
-  margin-bottom: 1rem;
-  color: #6b7280;
-  line-height: 1.6;
-}
-
-.tender-card p b {
-  color: #374151;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: var(--c-ink);
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
+.tender-card__desc {
+  font-size: 0.875rem;
+  color: var(--c-muted);
+  line-height: 1.6;
+  margin: 0.5rem 0 1.25rem;
+}
+
+/* ─── Meta row ──────────────────────────────────────── */
 .tender-meta {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin: 1.5rem 0;
-  padding: 1.5rem 0;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--c-faint);
+  border-bottom: 1px solid var(--c-faint);
+  margin-bottom: 1.25rem;
 }
 
 .meta-item {
+  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
+  border-right: 1px solid var(--c-faint);
+}
+
+.meta-item:last-child {
+  border-right: none;
 }
 
 .meta-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #9ca3af;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--c-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .meta-value {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--c-ink);
+  letter-spacing: -0.02em;
 }
 
-/* STATUS BADGES */
+/* ─── Status badge ──────────────────────────────────── */
 .status-badge {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
 }
 
 .status-open {
-  background: #d1fae5;
-  color: #065f46;
-  border-left: 3px solid #10b981;
+  background: var(--c-open-bg);
+  color: var(--c-open);
+  border-color: #a7d9be;
 }
 
 .status-closed {
-  background: #fee2e2;
-  color: #7f1d1d;
-  border-left: 3px solid #ef4444;
+  background: var(--c-closed-bg);
+  color: var(--c-closed);
+  border-color: #f5b8b8;
 }
 
 .status-not-started {
-  background: #fef3c7;
-  color: #92400e;
-  border-left: 3px solid #f59e0b;
+  background: var(--c-pending-bg);
+  color: var(--c-pending);
+  border-color: #f0d59a;
 }
 
-/* TIMER */
+/* ─── Timer ─────────────────────────────────────────── */
 .timer {
-  font-size: 1.1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  margin: 1rem 0;
-  text-align: center;
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-/* BID SECTION */
-.bid-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--c-accent);
+  background: var(--c-accent-light);
+  border: 1px solid #c0d4e8;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  margin: 0 0 1.25rem;
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.6rem;
+  letter-spacing: 0.04em;
 }
 
-.bid-info {
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  border-left: 3px solid #667eea;
+.timer::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c-open);
+  animation: blink 1.4s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-.bid-info p {
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* ─── Current bid ───────────────────────────────────── */
+.current-bid {
+  background: var(--c-bid-bg);
+  border: 1px solid #c0d4e8;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.current-bid__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--c-bid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.current-bid__amount {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--c-bid);
+}
+
+/* ─── No bid notice ─────────────────────────────────── */
+.no-bid {
+  background: var(--c-pending-bg);
+  border: 1px solid #f0d59a;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  color: var(--c-pending);
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+
+/* ─── Bid section ───────────────────────────────────── */
+.bid-section {
+  border-top: 1px solid var(--c-faint);
+  padding: 1.25rem 1.75rem 1.75rem;
 }
 
 .bid-input-group {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
+  gap: 0.625rem;
+  align-items: stretch;
 }
 
-.bid-input-group input {
+.bid-input-group input[type="number"] {
   flex: 1;
-  max-width: 100%;
-  padding: 0.9rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.bid-input-group input:focus {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  border: 1px solid var(--c-faint);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 1rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  -moz-appearance: textfield;
 }
 
-.bid-input-group button {
-  padding: 0.9rem 1.5rem;
-  min-width: 130px;
-  white-space: nowrap;
-  margin: 0;
+.bid-input-group input[type="number"]::-webkit-inner-spin-button,
+.bid-input-group input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }
 
-/* NO BID MESSAGE */
-.no-bid {
-  background: #fef3c7;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  color: #92400e;
-  border-left: 3px solid #f59e0b;
+.bid-input-group input[type="number"]::placeholder {
+  color: #b0aaa0;
+}
+
+.bid-input-group input[type="number"]:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.1);
+}
+
+/* ─── Buttons ───────────────────────────────────────── */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 0.825rem;
   font-weight: 500;
-  margin: 1rem 0;
+  border-radius: var(--radius-md);
+  padding: 0.7rem 1.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+  line-height: 1;
+  letter-spacing: 0.01em;
 }
 
-/* ACTION BUTTONS */
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--c-accent);
+  color: #ffffff;
+  border-color: var(--c-accent);
+}
+
+.btn-primary:hover {
+  background: #142e4a;
+  box-shadow: 0 2px 10px rgba(26,58,92,0.22);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--c-accent);
+  border-color: var(--c-faint);
+}
+
+.btn-secondary:hover {
+  background: var(--c-accent-light);
+  border-color: #c0d4e8;
+}
+
+/* ─── Action buttons (gov) ──────────────────────────── */
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.625rem;
+  padding: 1.25rem 1.75rem 1.75rem;
+  border-top: 1px solid var(--c-faint);
 }
 
-.action-buttons button {
+.action-buttons .btn {
   width: 100%;
-  padding: 0.9rem;
-  font-size: 0.95rem;
-  min-width: auto;
-  margin: 0;
-  border-radius: 0.75rem;
-  font-weight: 600;
-}
-
-.action-buttons button:hover {
-  transform: translateY(-2px);
-}
-
-/* COMPLETED STATUS */
-.completed-badge {
-  display: inline-block;
-  background: #d1fae5;
-  color: #065f46;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
+  justify-content: center;
+  padding: 0.8rem;
   font-size: 0.85rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
+}
+
+/* ─── Badges (work/payment status) ─────────────────── */
+.completed-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  background: var(--c-open-bg);
+  color: var(--c-open);
+  border: 1px solid #a7d9be;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .pending-badge {
-  display: inline-block;
-  background: #fee2e2;
-  color: #7f1d1d;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  background: var(--c-pending-bg);
+  color: var(--c-pending);
+  border: 1px solid #f0d59a;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* ANIMATIONS */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ─── Animations ────────────────────────────────────── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.tender-card:nth-child(1) { animation-delay: 0.04s; }
+.tender-card:nth-child(2) { animation-delay: 0.08s; }
+.tender-card:nth-child(3) { animation-delay: 0.12s; }
+.tender-card:nth-child(4) { animation-delay: 0.16s; }
+.tender-card:nth-child(n+5) { animation-delay: 0.20s; }
 
-.tender-card {
-  animation: slideInUp 0.5s ease-out;
-}
-
-.tender-card:nth-child(1) { animation-delay: 0.05s; }
-.tender-card:nth-child(2) { animation-delay: 0.1s; }
-.tender-card:nth-child(3) { animation-delay: 0.15s; }
-.tender-card:nth-child(4) { animation-delay: 0.2s; }
-.tender-card:nth-child(n+5) { animation-delay: 0.25s; }
-
-/* RESPONSIVE */
-@media (max-width: 1024px) {
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 640px) {
   .tender-list {
-    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .tender-list {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .tender-card {
-    padding: 1.5rem;
-  }
-
-  .tender-meta {
-    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .tender-card h3 {
-    font-size: 1.25rem;
+  .tender-card__body {
+    padding: 1.25rem 1.25rem 0;
+  }
+
+  .bid-section,
+  .action-buttons {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .tender-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .meta-item:nth-child(3) {
+    border-top: 1px solid var(--c-faint);
+    border-right: none;
+    grid-column: span 2;
   }
 
   .bid-input-group {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .bid-input-group button {
-    width: 100%;
-  }
-
-  .timer {
-    font-size: 1rem;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .action-buttons button {
+  .bid-input-group .btn {
     width: 100%;
   }
 }
-
-@media (max-width: 480px) {
-  .tender-card {
-    padding: 1rem;
-  }
-
-  .tender-card h3 {
-    font-size: 1.1rem;
-  }
-
-  .tender-meta {
-    font-size: 0.9rem;
-  }
-
-  .meta-value {
-    font-size: 1rem;
-  }
-
-  .timer {
-    font-size: 0.9rem;
-    padding: 0.75rem;
-  }
-}
-

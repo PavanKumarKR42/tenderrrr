@@ -20,14 +20,10 @@ function TenderList({ filter = "all", initialTenders = [] }) {
   const fetchTenders = async () => {
     try {
       const res = await axios.get("http://localhost:5000/tender/all");
-
       const tenderMap = new Map();
       res.data.forEach(t => {
-        if (!tenderMap.has(t.tenderId)) {
-          tenderMap.set(t.tenderId, t);
-        }
+        if (!tenderMap.has(t.tenderId)) tenderMap.set(t.tenderId, t);
       });
-
       setTenders(Array.from(tenderMap.values()));
     } catch (error) {
       console.error("Error fetching tenders:", error);
@@ -35,12 +31,13 @@ function TenderList({ filter = "all", initialTenders = [] }) {
   };
 
   useEffect(() => {
-  if (!initialTenders || initialTenders.length === 0) {
-    fetchTenders(); // fallback
-  } else {
-    setTenders(initialTenders); // use passed data
-  }
-}, [initialTenders]);
+    if (!initialTenders || initialTenders.length === 0) {
+      fetchTenders();
+    } else {
+      setTenders(initialTenders);
+    }
+  }, [initialTenders]);
+
   // ----------------------------
   // Timer
   // ----------------------------
@@ -51,13 +48,12 @@ function TenderList({ filter = "all", initialTenders = [] }) {
 
       tenders.forEach((t) => {
         const status = getTenderStatus(t.biddingStart, t.biddingEnd);
-        if (status === "🟢 OPEN") {
+        if (status === "OPEN") {
           const diff = t.biddingEnd - now;
           if (diff > 0) {
             const h = Math.floor(diff / 3600);
             const m = Math.floor((diff % 3600) / 60);
             const s = diff % 60;
-
             updated[t.tenderId] =
               `${String(h).padStart(2, "0")}:` +
               `${String(m).padStart(2, "0")}:` +
@@ -70,23 +66,32 @@ function TenderList({ filter = "all", initialTenders = [] }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [tenders, initialTenders]);
+  }, [tenders]);
 
   const getTenderStatus = (start, end) => {
     const now = Math.floor(Date.now() / 1000);
-    if (now < start) return "⏳ NOT STARTED";
-    if (now >= start && now <= end) return "🟢 OPEN";
-    return "🔴 CLOSED";
+    if (now < start) return "NOT_STARTED";
+    if (now >= start && now <= end) return "OPEN";
+    return "CLOSED";
+  };
+
+  const statusLabel = {
+    OPEN: "● Live",
+    CLOSED: "Closed",
+    NOT_STARTED: "Upcoming",
+  };
+
+  const statusClass = {
+    OPEN: "status-open",
+    CLOSED: "status-closed",
+    NOT_STARTED: "status-not-started",
   };
 
   // ----------------------------
-  // 🚀 PLACE BID (FIXED)
+  // Place bid
   // ----------------------------
   const placeBid = async (tenderId) => {
-    if (biddingInProgress[tenderId]) {
-      return alert("❌ Bid already in progress");
-    }
-
+    if (biddingInProgress[tenderId]) return alert("Bid already in progress");
     if (!walletAddress) return alert("Connect wallet first");
     if (!bidAmounts[tenderId]) return alert("Enter bid amount");
 
@@ -96,52 +101,35 @@ function TenderList({ filter = "all", initialTenders = [] }) {
       const contract = await getContract();
       const bidAmount = Number(bidAmounts[tenderId]);
 
-      // ✅ Get tender from DB
       const tender = tenders.find(t => Number(t.tenderId) === Number(tenderId));
-      if (!tender) return alert("❌ Tender not found");
+      if (!tender) return alert("Tender not found");
 
-      // ✅ RANGE VALIDATION
       const minAllowed = Math.min(tender.minAmount, tender.maxAmount);
       const maxAllowed = Math.max(tender.minAmount, tender.maxAmount);
 
       if (bidAmount < minAllowed || bidAmount > maxAllowed) {
-        return alert(`❌ Bid must be between ₹${minAllowed} and ₹${maxAllowed}`);
+        return alert(`Bid must be between ₹${minAllowed} and ₹${maxAllowed}`);
       }
 
-      // ✅ 🔥 CRITICAL FIX: VALIDATE AGAINST DB LAST BID
       if (tender.lastBidAmount !== null && bidAmount >= tender.lastBidAmount) {
-        return alert(
-          `❌ Your bid must be LOWER than current bid ₹${tender.lastBidAmount}`
-        );
+        return alert(`Your bid must be lower than current bid ₹${tender.lastBidAmount}`);
       }
 
-      // ----------------------------
-      // Blockchain (NO VALIDATION)
-      // ----------------------------
-      const tx = await contract.placeBid(
-        tenderId,
-        BigInt(Math.floor(bidAmount))
-      );
-
+      const tx = await contract.placeBid(tenderId, BigInt(Math.floor(bidAmount)));
       await tx.wait();
 
-      // ----------------------------
-      // Update DB
-      // ----------------------------
       await axios.post("http://localhost:5000/bid/update", {
         tenderId,
         bidAmount,
-        bidder: walletAddress
+        bidder: walletAddress,
       });
 
-      alert("🎯 Bid placed successfully");
-
+      alert("Bid placed successfully");
       setBidAmounts(p => ({ ...p, [tenderId]: "" }));
       fetchTenders();
-
     } catch (err) {
       console.error(err);
-      alert(err?.reason || err?.message || "❌ Bid failed");
+      alert(err?.reason || err?.message || "Bid failed");
     } finally {
       setBiddingInProgress(p => ({ ...p, [tenderId]: false }));
     }
@@ -154,15 +142,11 @@ function TenderList({ filter = "all", initialTenders = [] }) {
     try {
       const contract = await getContract();
       await (await contract.markWorkCompleted(BigInt(tenderId))).wait();
-
-      await axios.post("http://localhost:5000/tender/mark-complete", {
-        tenderId
-      });
-
+      await axios.post("http://localhost:5000/tender/mark-complete", { tenderId });
       fetchTenders();
-      alert("✅ Work completed");
+      alert("Work marked as completed");
     } catch {
-      alert("❌ Error");
+      alert("Error marking work complete");
     }
   };
 
@@ -170,15 +154,11 @@ function TenderList({ filter = "all", initialTenders = [] }) {
     try {
       const contract = await getContract();
       await (await contract.releasePayment(BigInt(tenderId))).wait();
-
-      await axios.post("http://localhost:5000/tender/payment-done", {
-        tenderId
-      });
-
+      await axios.post("http://localhost:5000/tender/payment-done", { tenderId });
       fetchTenders();
-      alert("💸 Payment released");
+      alert("Payment released");
     } catch {
-      alert("❌ Error");
+      alert("Error releasing payment");
     }
   };
 
@@ -190,69 +170,102 @@ function TenderList({ filter = "all", initialTenders = [] }) {
       {tenders.map((t) => {
         const status = getTenderStatus(t.biddingStart, t.biddingEnd);
 
-// ----------------------------
-// ✅ FILTER FIX (IMPORTANT)
-// ----------------------------
-
-// Ongoing = has bid AND not paid
-if (filter === "ongoing") {
-  if (t.lastBidAmount === null) return null; // ❌ remove no-bid tenders
-  if (t.paymentReleased) return null;        // ❌ remove completed
-}
-
-// Completed = payment released
-if (filter === "completed") {
-  if (!t.paymentReleased) return null;
-}
+        if (filter === "ongoing") {
+          if (t.lastBidAmount === null) return null;
+          if (t.paymentReleased) return null;
+        }
+        if (filter === "completed") {
+          if (!t.paymentReleased) return null;
+        }
 
         return (
-  <div className="tender-card" key={t.tenderId}>
-    <h3>{t.title}</h3>
-    <p>{t.description}</p>
+          <div className="tender-card" key={t.tenderId}>
+            <div className="tender-card__stripe" />
 
-    <p>Start: ₹{t.maxAmount}</p>
-    <p>Min: ₹{t.minAmount}</p>
+            <div className="tender-card__body">
+              <div className="tender-card__header">
+                <h3>{t.title}</h3>
+                <span className={`status-badge ${statusClass[status]}`}>
+                  {statusLabel[status]}
+                </span>
+              </div>
 
-    {t.lastBidAmount && (
-      <p>💰 Current Bid: ₹{t.lastBidAmount}</p>
-    )}
+              <p className="tender-card__desc">{t.description}</p>
 
-    {/* ✅ COUNTDOWN TIMER ADDED */}
-    {status === "🟢 OPEN" && timers[t.tenderId] && (
-      <p>⏳ Closes in: {timers[t.tenderId]}</p>
-    )}
+              <div className="tender-meta">
+                <div className="meta-item">
+                  <span className="meta-label">Start amount</span>
+                  <span className="meta-value">₹{t.maxAmount.toLocaleString()}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-label">Floor</span>
+                  <span className="meta-value">₹{t.minAmount.toLocaleString()}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-label">Tender ID</span>
+                  <span className="meta-value">#{t.tenderId}</span>
+                </div>
+              </div>
 
-    {status === "🟢 OPEN" && (
-      <div>
-        <input
-          type="number"
-          value={bidAmounts[t.tenderId] || ""}
-          onChange={(e) =>
-            setBidAmounts({ ...bidAmounts, [t.tenderId]: e.target.value })
-          }
-        />
-        <button onClick={() => placeBid(t.tenderId)}>
-          Place Bid
-        </button>
-      </div>
-    )}
+              {t.lastBidAmount ? (
+                <div className="current-bid">
+                  <span className="current-bid__label">Current bid</span>
+                  <span className="current-bid__amount">₹{Number(t.lastBidAmount).toLocaleString()}</span>
+                </div>
+              ) : (
+                status === "CLOSED" && (
+                  <div className="no-bid">No bids were placed on this tender.</div>
+                )
+              )}
 
-    {userRole === "government" && status === "🔴 CLOSED" && t.lastBidAmount !== null && (
-      <>
-        {!t.workCompleted && (
-          <button onClick={() => markCompleted(t.tenderId)}>
-            Complete
-          </button>
-        )}
-        {t.workCompleted && !t.paymentReleased && (
-          <button onClick={() => releasePayment(t.tenderId)}>
-            Pay
-          </button>
-        )}
-      </>
-    )}
-  </div>
-);
+              {status === "OPEN" && timers[t.tenderId] && (
+                <div className="timer">
+                  Closes in {timers[t.tenderId]}
+                </div>
+              )}
+            </div>
+
+            {status === "OPEN" && (
+              <div className="bid-section">
+                <div className="bid-input-group">
+                  <input
+                    type="number"
+                    placeholder="Enter your bid (₹)"
+                    value={bidAmounts[t.tenderId] || ""}
+                    onChange={(e) =>
+                      setBidAmounts({ ...bidAmounts, [t.tenderId]: e.target.value })
+                    }
+                  />
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => placeBid(t.tenderId)}
+                    disabled={biddingInProgress[t.tenderId]}
+                  >
+                    {biddingInProgress[t.tenderId] ? "Placing…" : "Place bid"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {userRole === "government" && status === "CLOSED" && t.lastBidAmount !== null && (
+              <div className="action-buttons">
+                {!t.workCompleted && (
+                  <button className="btn btn-primary" onClick={() => markCompleted(t.tenderId)}>
+                    Mark work completed
+                  </button>
+                )}
+                {t.workCompleted && !t.paymentReleased && (
+                  <button className="btn btn-secondary" onClick={() => releasePayment(t.tenderId)}>
+                    Release payment
+                  </button>
+                )}
+                {t.workCompleted && (
+                  <span className="completed-badge">Work verified</span>
+                )}
+              </div>
+            )}
+          </div>
+        );
       })}
     </div>
   );

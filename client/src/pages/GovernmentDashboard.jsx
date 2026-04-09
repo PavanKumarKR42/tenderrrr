@@ -3,7 +3,6 @@ import axios from "axios";
 import CreateTender from "./CreateTender.jsx";
 import TenderList from "./TenderList.jsx";
 import BidderHistory from "./BidderHistory.jsx";
-
 import "../styles/dashboard.css";
 
 function GovernmentDashboard() {
@@ -12,13 +11,12 @@ function GovernmentDashboard() {
   const [tenders, setTenders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch bidders and tenders data
   const fetchBiddersData = async () => {
     setLoading(true);
     try {
       const [biddersRes, tendersRes] = await Promise.all([
         axios.get("http://localhost:5000/bidder"),
-        axios.get("http://localhost:5000/tender/all")
+        axios.get("http://localhost:5000/tender/all"),
       ]);
       setBidders(biddersRes.data);
       setTenders(tendersRes.data);
@@ -30,273 +28,169 @@ function GovernmentDashboard() {
   };
 
   useEffect(() => {
-    if (activeTab === "analytics") {
-      fetchBiddersData();
-    }
+    if (activeTab === "analytics") fetchBiddersData();
   }, [activeTab]);
 
-  // Calculate bidder statistics
-  const calculateBidderStats = () => {
-    return bidders.map(bidder => {
-      // Get all contracts won by this bidder
+  const calculateBidderStats = () =>
+    bidders.map((bidder) => {
       const contractsWon = tenders.filter(
-        t => t.lastBidder === bidder.wallet && t.paymentReleased
+        (t) => t.lastBidder === bidder.wallet && t.paymentReleased
       );
-
-      // Total payment received
       const totalPaymentReceived = contractsWon.reduce(
-        (sum, contract) => sum + (contract.lastBidAmount || 0),
+        (sum, c) => sum + (c.lastBidAmount || 0),
         0
       );
-
-      // Number of contracts won
       const contractsCount = contractsWon.length;
-
-      // SCORING FORMULA (1-1000):
-      // Base: 50 points + (contracts won * 100) + (payment received / 100)
-      // Normalized to 1-1000 range
-      const baseScore = 50;
-      const contractScore = contractsCount * 100;
-      const paymentScore = Math.min(totalPaymentReceived / 100, 500); // Cap at 500
-      let score = baseScore + contractScore + paymentScore;
-
-      // Normalize to max 1000
-      score = Math.min(Math.round(score), 1000);
-      score = Math.max(score, 1); // Minimum score of 1
-
-      return {
-        ...bidder,
-        contractsWon: contractsCount,
-        totalPaymentReceived,
-        score
-      };
+      let score =
+        50 +
+        contractsCount * 100 +
+        Math.min(totalPaymentReceived / 100, 500);
+      score = Math.max(Math.min(Math.round(score), 1000), 1);
+      return { ...bidder, contractsWon: contractsCount, totalPaymentReceived, score };
     });
-  };
 
   const bidderStats = activeTab === "analytics" ? calculateBidderStats() : [];
   const sortedBidders = [...bidderStats].sort((a, b) => b.score - a.score);
 
+  const getScoreClass = (score) => {
+    if (score >= 700) return "score-pill score-excellent";
+    if (score >= 500) return "score-pill score-good";
+    if (score >= 300) return "score-pill score-average";
+    return "score-pill score-beginner";
+  };
+
+  const getScoreLabel = (score) => {
+    if (score >= 700) return "Excellent";
+    if (score >= 500) return "Good";
+    if (score >= 300) return "Average";
+    return "Beginner";
+  };
+
+  const tabs = [
+    { id: "create",    label: "Create tender" },
+    { id: "ongoing",   label: "Ongoing" },
+    { id: "completed", label: "Completed" },
+    { id: "bidders",   label: "Bidders & winners" },
+    { id: "analytics", label: "Analytics" },
+  ];
+
   return (
     <div className="dashboard">
-      <h2>🏛 Government Dashboard</h2>
+      <h2>Government Dashboard</h2>
 
-      {/* Tabs */}
       <div className="tabs">
-        <button
-          className={activeTab === "create" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("create")}
-        >
-          ➕ Create Tender
-        </button>
-
-        <button
-          className={activeTab === "ongoing" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("ongoing")}
-        >
-          🚧 Ongoing Contracts
-        </button>
-
-        <button
-          className={activeTab === "completed" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("completed")}
-        >
-          ✅ Completed Contracts
-        </button>
-
-        <button
-          className={activeTab === "bidders" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("bidders")}
-        >
-          👷 Bidders & Winners
-        </button>
-
-        <button
-          className={activeTab === "analytics" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("analytics")}
-        >
-          📊 Bidders Analytics
-        </button>
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            className={`tab${activeTab === t.id ? " active" : ""}`}
+            onClick={() => setActiveTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      <hr />
-
-      {/* Tab Content */}
       {activeTab === "create" && <CreateTender />}
-
-      {activeTab === "ongoing" && (
-        <TenderList filter="ongoing" />
-      )}
-
-      {activeTab === "completed" && (
-        <TenderList filter="completed" />
-      )}
-
+      {activeTab === "ongoing" && <TenderList filter="ongoing" />}
+      {activeTab === "completed" && <TenderList filter="completed" />}
       {activeTab === "bidders" && <BidderHistory />}
 
-      {/* BIDDERS ANALYTICS TAB */}
       {activeTab === "analytics" && (
         <div className="form-container">
-          <h3>📊 Bidders Analytics & Performance Ranking</h3>
-          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
-            View all bidders with their performance metrics and scores
-          </p>
+          <h3>Bidder analytics &amp; performance ranking</h3>
+          <p>Performance metrics and scores for all registered bidders.</p>
 
           {loading ? (
-            <p style={{ textAlign: 'center', padding: '2rem' }}>⏳ Loading bidders data...</p>
+            <div className="state-loading">Loading bidder data…</div>
           ) : sortedBidders.length > 0 ? (
             <>
-              {/* SUMMARY STATS */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1.5rem',
-                marginBottom: '2rem'
-              }}>
-                <div style={{ background: '#dbeafe', padding: '1.5rem', borderRadius: '0.75rem', borderLeft: '4px solid #3b82f6' }}>
-                  <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: '0 0 0.5rem 0', fontWeight: '600' }}>
-                    TOTAL BIDDERS
-                  </p>
-                  <p style={{ fontSize: '2rem', fontWeight: '700', color: '#1e40af', margin: '0' }}>
-                    {sortedBidders.length}
-                  </p>
+              {/* Summary stats */}
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <span className="stat-card__label">Total bidders</span>
+                  <span className="stat-card__value">{sortedBidders.length}</span>
                 </div>
-                <div style={{ background: '#d1fae5', padding: '1.5rem', borderRadius: '0.75rem', borderLeft: '4px solid #10b981' }}>
-                  <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: '0 0 0.5rem 0', fontWeight: '600' }}>
-                    TOTAL CONTRACTS WON
-                  </p>
-                  <p style={{ fontSize: '2rem', fontWeight: '700', color: '#047857', margin: '0' }}>
-                    {sortedBidders.reduce((sum, b) => sum + b.contractsWon, 0)}
-                  </p>
+                <div className="stat-card">
+                  <span className="stat-card__label">Contracts won</span>
+                  <span className="stat-card__value">
+                    {sortedBidders.reduce((s, b) => s + b.contractsWon, 0)}
+                  </span>
                 </div>
-                <div style={{ background: '#fed7aa', padding: '1.5rem', borderRadius: '0.75rem', borderLeft: '4px solid #f59e0b' }}>
-                  <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: '0 0 0.5rem 0', fontWeight: '600' }}>
-                    TOTAL AMOUNT PAID
-                  </p>
-                  <p style={{ fontSize: '2rem', fontWeight: '700', color: '#92400e', margin: '0' }}>
-                    ₹{sortedBidders.reduce((sum, b) => sum + b.totalPaymentReceived, 0).toLocaleString()}
-                  </p>
+                <div className="stat-card">
+                  <span className="stat-card__label">Total paid out</span>
+                  <span className="stat-card__value">
+                    ₹{sortedBidders
+                      .reduce((s, b) => s + b.totalPaymentReceived, 0)
+                      .toLocaleString()}
+                  </span>
                 </div>
               </div>
 
-              {/* BIDDERS TABLE */}
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  background: 'white',
-                  borderRadius: '0.75rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                }}>
+              {/* Table */}
+              <div className="analytics-table-wrap">
+                <table className="analytics-table">
                   <thead>
-                    <tr style={{ background: '#f3f4f6', borderBottom: '2px solid #e5e7eb' }}>
-                      <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Rank</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Wallet Address</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Name</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Company</th>
-                      <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', color: '#374151' }}>Contracts Won</th>
-                      <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151' }}>Payment Received</th>
-                      <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', color: '#374151' }}>Score</th>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Rank</th>
+                      <th style={{ textAlign: "left" }}>Wallet</th>
+                      <th style={{ textAlign: "left" }}>Name</th>
+                      <th style={{ textAlign: "left" }}>Company</th>
+                      <th style={{ textAlign: "center" }}>Contracts won</th>
+                      <th style={{ textAlign: "right" }}>Payment received</th>
+                      <th style={{ textAlign: "center" }}>Score</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedBidders.map((bidder, index) => {
-                      // Score color gradient
-                      let scoreColor = '#ef4444'; // Red
-                      if (bidder.score >= 700) scoreColor = '#10b981'; // Green
-                      else if (bidder.score >= 500) scoreColor = '#3b82f6'; // Blue
-                      else if (bidder.score >= 300) scoreColor = '#f59e0b'; // Orange
-
-                      return (
-                        <tr
-                          key={bidder.wallet}
-                          style={{
-                            borderBottom: '1px solid #e5e7eb',
-                            transition: 'background 0.2s ease',
-                            background: index % 2 === 0 ? '#ffffff' : '#f9fafb'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f0fdf4'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? '#ffffff' : '#f9fafb'}
-                        >
-                          <td style={{ padding: '1rem', fontWeight: '700', color: '#1f2937' }}>
-                            {index + 1}
-                          </td>
-                          <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.85rem', color: '#6b7280' }}>
-                            {bidder.wallet.substring(0, 10)}...{bidder.wallet.substring(bidder.wallet.length - 8)}
-                          </td>
-                          <td style={{ padding: '1rem', color: '#1f2937', fontWeight: '500' }}>
-                            {bidder.name}
-                          </td>
-                          <td style={{ padding: '1rem', color: '#6b7280' }}>
-                            {bidder.company}
-                          </td>
-                          <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', color: '#3b82f6' }}>
-                            {bidder.contractsWon}
-                          </td>
-                          <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#059669' }}>
-                            ₹{bidder.totalPaymentReceived.toLocaleString()}
-                          </td>
-                          <td style={{ padding: '1rem', textAlign: 'center' }}>
-                            <div style={{
-                              display: 'inline-block',
-                              background: scoreColor,
-                              color: 'white',
-                              padding: '0.5rem 1rem',
-                              borderRadius: '0.5rem',
-                              fontWeight: '700',
-                              fontSize: '0.9rem'
-                            }}>
-                              {bidder.score}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {sortedBidders.map((bidder, index) => (
+                      <tr key={bidder.wallet}>
+                        <td className="rank-cell">{index + 1}</td>
+                        <td className="wallet-cell">
+                          {bidder.wallet.substring(0, 8)}…
+                          {bidder.wallet.substring(bidder.wallet.length - 6)}
+                        </td>
+                        <td className="name-cell">{bidder.name}</td>
+                        <td className="company-cell">{bidder.company}</td>
+                        <td className="contracts-cell">{bidder.contractsWon}</td>
+                        <td className="payment-cell">
+                          ₹{bidder.totalPaymentReceived.toLocaleString()}
+                        </td>
+                        <td className="score-cell">
+                          <span className={getScoreClass(bidder.score)}>
+                            {bidder.score} · {getScoreLabel(bidder.score)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
 
-              {/* SCORING FORMULA EXPLANATION */}
-              <div style={{
-                marginTop: '2rem',
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: '0.75rem',
-                padding: '1.5rem'
-              }}>
-                <h4 style={{ color: '#1e40af', margin: '0 0 1rem 0' }}>📏 Scoring Formula</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+              {/* Scoring formula */}
+              <div className="formula-box">
+                <h4>Scoring formula</h4>
+                <div className="formula-grid">
                   <div>
-                    <p style={{ color: '#1f2937', fontWeight: '600', margin: '0 0 0.5rem 0' }}>Base Components:</p>
-                    <ul style={{ color: '#6b7280', margin: '0', paddingLeft: '1.5rem' }}>
-                      <li>Base Score: +50 points</li>
-                      <li>Per Contract: +100 points each</li>
-                      <li>Payment Score: +1 point per ₹100</li>
+                    <p>Components</p>
+                    <ul>
+                      <li>Base score: +50 pts</li>
+                      <li>Per contract won: +100 pts</li>
+                      <li>Per ₹100 paid out: +1 pt (cap 500)</li>
                     </ul>
                   </div>
                   <div>
-                    <p style={{ color: '#1f2937', fontWeight: '600', margin: '0 0 0.5rem 0' }}>Scoring Ranges:</p>
-                    <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                      <div style={{ margin: '0.5rem 0' }}><span style={{ color: '#10b981', fontWeight: '600' }}>700-1000:</span> Excellent</div>
-                      <div style={{ margin: '0.5rem 0' }}><span style={{ color: '#3b82f6', fontWeight: '600' }}>500-699:</span> Good</div>
-                      <div style={{ margin: '0.5rem 0' }}><span style={{ color: '#f59e0b', fontWeight: '600' }}>300-499:</span> Average</div>
-                      <div style={{ margin: '0.5rem 0' }}><span style={{ color: '#ef4444', fontWeight: '600' }}>1-299:</span> Beginner</div>
+                    <p>Score ranges</p>
+                    <div className="formula-ranges">
+                      <span className="score-pill score-excellent">700 – 1000 · Excellent</span>
+                      <span className="score-pill score-good">500 – 699 · Good</span>
+                      <span className="score-pill score-average">300 – 499 · Average</span>
+                      <span className="score-pill score-beginner">1 – 299 · Beginner</span>
                     </div>
                   </div>
                 </div>
               </div>
             </>
           ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '3rem',
-              background: '#fef3c7',
-              borderRadius: '0.75rem',
-              border: '1px solid #fcd34d'
-            }}>
-              <p style={{ color: '#92400e', fontSize: '1.1rem', margin: '0' }}>
-                📭 No bidders registered yet
-              </p>
-            </div>
+            <div className="state-empty">No bidders registered yet.</div>
           )}
         </div>
       )}

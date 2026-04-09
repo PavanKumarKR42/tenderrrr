@@ -265,7 +265,7 @@ To customize colors, update the CSS variables in `global.css`:
 :root {
   --primary-color: #3b82f6;
   --secondary-color: #10b981;
-  --danger-color: #ef4444;
+  --danger-color: #e3abab;
   /* etc. */
 }
 ```

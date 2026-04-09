@@ -19,7 +19,7 @@ function Navbar() {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1rem 2rem',
-      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+      background: 'linear-gradient(135deg, #7db8e8 0%, #6ba3d4 100%)',
       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       color: 'white'
     }}>
@@ -45,7 +45,7 @@ function Navbar() {
         <button
           onClick={handleLogout}
           style={{
-            background: '#ef4444',
+            background: '#772f2f21',
             color: 'white',
             border: 'none',
             padding: '0.5rem 1rem',
